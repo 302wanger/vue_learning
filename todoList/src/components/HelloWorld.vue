@@ -1,101 +1,69 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li>
-        <a
-          href="https://vuejs.org"
-          target="_blank"
-        >
-          Core Docs
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://forum.vuejs.org"
-          target="_blank"
-        >
-          Forum
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://chat.vuejs.org"
-          target="_blank"
-        >
-          Community Chat
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://twitter.com/vuejs"
-          target="_blank"
-        >
-          Twitter
-        </a>
-      </li>
-      <br>
-      <li>
-        <a
-          href="http://vuejs-templates.github.io/webpack/"
-          target="_blank"
-        >
-          Docs for This Template
-        </a>
-      </li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li>
-        <a
-          href="http://router.vuejs.org/"
-          target="_blank"
-        >
-          vue-router
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vuex.vuejs.org/"
-          target="_blank"
-        >
-          vuex
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vue-loader.vuejs.org/"
-          target="_blank"
-        >
-          vue-loader
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-        >
-          awesome-vue
-        </a>
-      </li>
-    </ul>
+  <div class="HelloWorld">
+    <div>
+      <h1>{{ title }}</h1>
+    </div>
+    <div>
+      <input type="text" v-model="inputTodo" @keyup.enter="addItem">
+      <button @click="addItem">Add</button>
+    </div>
+    <div>
+      <ul>
+        <li v-for="(item,index) in todoLists" v-bind:class="{finished: item.isFinished}">
+          {{item.label}}
+          <button v-on:click="toggleFinish(item)">Done</button>
+          <button @click="removeItem">Delete</button>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script>
+import Storage from './localStorage'
+
 export default {
   name: 'HelloWorld',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      title: 'Todo List',
+      todoLists: Storage.fetch(),
+      inputTodo: ''
     }
+  },
+  methods: {
+    addItem: function() {
+      this.todoLists.push({
+        label: this.inputTodo,
+        isFinished: false
+      })
+      this.inputTodo = ''
+    },
+    toggleFinish: function(item) {
+      item.isFinished = !item.isFinished
+    },
+    removeItem: function(index) {
+      this.todoLists.splice(index, 1)
+    }
+  },
+  watch:{
+  	todoLists:{
+	  	 handler: function (todoLists) {
+	      Storage.save(todoLists);//监控li变化，将新增的值存入 localStorage 里
+	    },										
+	  	deep:true							
+  	}
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.finished {
+  border-radius: 1px solid black;
+  background: #42b983;
+  
+}
 h1, h2 {
   font-weight: normal;
 }
@@ -104,8 +72,9 @@ ul {
   padding: 0;
 }
 li {
-  display: inline-block;
+  display: block;
   margin: 0 10px;
+  margin-bottom: 10px;
 }
 a {
   color: #42b983;
